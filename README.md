@@ -200,3 +200,9 @@ A running instance of an image
 - docker run -it -p 3000:3000 -v /app/node_modules -v $(pwd):/app \<imageName>
   - -v /app/node_modules: put a bookmark on the node_modules folder so that it will not be overriden. /app/node_modules is previously added with npm install command in docker file
   - -v $(pwd):/app: put a reference to everything under current directory to /app directory
+
+# Travis
+
+- from https://travis-ci.com/ signup with github account
+- activate your repo
+- create .travis.yml file in root directory of your repo
