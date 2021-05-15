@@ -1,70 +1,202 @@
-# Getting Started with Create React App
+## Docker Terms
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### Image
 
-## Available Scripts
+- All files and configs(commands) to run a program (FS Snapshot & Startup Command)
+- All files exist in an isolated namespace which is a tech belongs to LINUX OS
 
-In the project directory, you can run:
+  #### Namespacing
 
-### `yarn start`
+  - Isolating resources per process(or group of processes)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+    - Processes, Hard drive, Network, Users, Hostnames, Inter Process Communication
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+  #### Control Groups(cgroups)
 
-### `yarn test`
+  - Limit amount of resources used per process
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+    - Memory, CPU Usage, HD I/O, Network Bandwith
 
-### `yarn build`
+### Container
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+A running instance of an image
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Docker Commands
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### docker pull \<image name>
 
-### `yarn eject`
+- retrieves image from docker hub
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### docker create \<image name>
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- Creates a container
+- Copies files
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### docker start -a \<container id>
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+- Runs startup commands
+- -a parameter tells to show any output on the terminal
 
-## Learn More
+### docker run \<image name>
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+- Checks if the image exists locally in the machine
+- If it does not find locally, it tries to get it from docker hub
+- Creates a container
+- Copies files
+- Runs startup commands
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### docker run -p \<vm port>:\<container port> \<imagename> \<override cmd>
 
-### Code Splitting
+- Creates container
+- Copies files
+- Runs \<override cmd> instead of startup command
+- new cmd is written on container and cannot be changed
+- container port can be accessible from vm port number
+- container can access any port
+- with -d parameter container runs in background
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### docker ps
 
-### Analyzing the Bundle Size
+- Lists all running containers
+- with --all parameter, lists all containers
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### docker system prune
 
-### Making a Progressive Web App
+- This will remove:
+  - all stopped containers
+  - all networks not used by at least one container
+  - all dangling images
+  - all dangling build cache
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### docker logs \<container Id>
 
-### Advanced Configuration
+- gets all logs of a running container since startup
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+### docker stop \<container Id>
 
-### Deployment
+- Sends SIGTERM signal which gives some time to cleanup
+- if the container does not stop in 10 seconds, it fallbacks to kill
+- preferred
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### docker kill \<container Id>
 
-### `yarn build` fails to minify
+- Sends SIGKILL signal which stops the process immediately
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### docker exec -it \<container id> \<command>
+
+- Runs a command inside a running container
+- -it parameter allows us to provide input to the container
+  - Binds communication channels: STDIN, STDOUT, STDERR
+  - Combined version of -i -t
+  - -t formats the output
+
+### docker exec -it \<container id> sh
+
+- runs the <b>sh</b> command shell if base image supports
+
+### docker run -it \<image id> sh
+
+- Creates the container
+- Copies image files
+- runs the <b>sh</b> command shell if base image supports
+- does not run default startup command
+
+### docker build -t \<docker Id>/\<repo/>project name>:\<version> \<Dockerfile directory>
+
+- Creates a image
+- . for context/working directory
+- -t tags the image
+- latest is used as version if no version provided
+- -f file can be used to specify docker file(especially for Dockerfile.dev)
+
+### docker push \<image name>
+
+- Pushes image to docker hub
+
+### docker commit -c 'CMD [\<primary commands>]' \<docker Id>
+
+- Creates an image from a running container
+
+## Dockerfile
+
+- Defines the commands to install a program on a computer with no OS
+- Every step returns an image and used later for caching
+- Every step runs in a new temp container based on the image created by the previous one
+
+- STEPS
+
+  - FROM \<baseImage>
+
+    - Downloads the image
+    - Returns the image for the next instruction
+    - ex: FROM alpine
+      -alpine means the smallest compact version when used as a tag(ex: node:alpine), but here it refers to a simple os like image that contains useful commands
+
+  - WORKDIR \<new working destination>
+
+    - Changes working directory, create the directory if does not exist
+
+  - COPY \<source> \<destination>
+
+    - Copies file from source to destination
+
+  - RUN \<commands>
+
+    - Creates a temporary container from the previous image
+    - Runs the command in the current container
+    - Takes a snapshot of that container's FS
+    - Shut down the temp container
+    - Get image ready for the next instruction
+    - ex: RUN apk add --update redis
+      - apk stands for apache package kit?
+
+  - CMD \<List of commands in string format seperated by comma>
+    - Creates a temporary container from the previous image
+    - Tells container it should run the commands when started(sets the primary command)
+    - Shut down the temp container
+    - Get image ready for the next instruction
+    - ex: CMD ["redis-server"]
+    - ex: CMD ["npm", "start"]
+
+### docker attach \<containerId>
+
+- attaches STDIN,STDOUT, STDERR channels of the primary process to terminal
+
+# docker-compose
+
+- Seperate CLI that gets installed along with Docker
+- Used to start up multiple Docker containers at the same time
+- Automates some of the long-winded arguments we were passing 'docker run'
+- restart policies
+  - no : never restart (should be written as 'no' since no is interpreted as false in yaml)
+  - always: always restart no matter what happened (used in webservers)
+  - on-failure: only restart if the container stops with an error code (i.e , exits with a code other than 0) (used in worker processes)
+  - unless-stopped: always restart unless we(the developers) forcibly stop it
+
+## docker-compose up
+
+- docker run myImage
+
+## docker-compose up --build
+
+- docker build .
+- docker run myImage
+- with -d parameter containers run in background
+
+## docker-compose down
+
+- stops all containers
+
+## docker-compose ps
+
+- Lists constainers in docker compose
+
+# React App with VOLUMES
+
+## npx create-react-app frontend
+
+- npx check if a module exists locally, if not finds it online and run it. (since npm 5.2.0)
+- creates a react project inside a new folder named frontend
+- docker run -it -p 3000:3000 -v /app/node_modules -v $(pwd):/app \<imageName>
+  - -v /app/node_modules: put a bookmark on the node_modules folder so that it will not be overriden. /app/node_modules is previously added with npm install command in docker file
+  - -v $(pwd):/app: put a reference to everything under current directory to /app directory
