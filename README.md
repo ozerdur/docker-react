@@ -1,4 +1,4 @@
-## Docker Terms with Travis and AWS
+## Docker Terms (with Travis and AWS)
 
 ### Image
 
