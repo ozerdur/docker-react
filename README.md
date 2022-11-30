@@ -101,7 +101,7 @@ A running instance of an image
 - runs the <b>sh</b> command shell if base image supports
 - does not run default startup command
 
-### docker build -t \<docker Id>/\<repo/>project name>:\<version> \<Dockerfile directory>
+### docker build -t \<docker Id>/\<repo/project name>:\<version> \<Dockerfile directory>
 
 - Creates a image
 - . for context/working directory
